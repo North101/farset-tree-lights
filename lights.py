@@ -1,40 +1,37 @@
-from math import sin
+import time
 
 import plasma
 from plasma import plasma_stick
 
 """
-Simple pulsing effect generated using a sine wave.
+Make some rainbows!
 """
 
 # Set how many LEDs you have
 NUM_LEDS = 50
 
-# we're using HSV colours in this example - find more at https://colorpicker.me/
-# to convert a hue that's in degrees, divide it by 360
-COLOUR = 0.5
+# The SPEED that the LEDs cycle at (1 - 255)
+SPEED = 20
 
-# set up the WS2812 / NeoPixel™ LEDs
+# How many times the LEDs will be updated per second
+UPDATES = 60
+
+# WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.COLOR_ORDER_RGB)
 
-# start updating the LED strip
+# Start updating the LED strip
 led_strip.start()
 
-offset = 0
+offset = 0.0
 
+# Make rainbows
 while True:
-    # use a sine wave to set the brightness
+
+    SPEED = min(255, max(1, SPEED))
+    offset += float(SPEED) / 2000.0
+
     for i in range(NUM_LEDS):
-        led_strip.set_hsv(i, COLOUR, 1.0, sin(offset))
-    offset += 0.002
+        hue = float(i) / NUM_LEDS
+        led_strip.set_hsv(i, hue + offset, 1.0, 1.0)
 
-#     # our sine wave goes between -1.0 and 1.0 - this means the LEDs will be off half the time
-#     # this formula forces the brightness to be between 0.0 and 1.0
-#     for i in range(NUM_LEDS):
-#         led_strip.set_hsv(i, COLOUR, 1.0, (1 + sin(offset)) / 2)
-#     offset += 0.002
-
-#     # adjust the saturation instead of the brightness/value
-#     for i in range(NUM_LEDS):
-#         led_strip.set_hsv(i, COLOUR, (1 + sin(offset)) / 2, 0.8)
-#     offset += 0.002
+    time.sleep(1.0 / UPDATES)
