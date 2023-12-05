@@ -1,13 +1,10 @@
-import gc
-import time
-from random import choice, random
+from math import sin
 
 import plasma
 from plasma import plasma_stick
 
 """
-A Christmas tree, with fairy lights!
-This will probably work better if your LEDs are in a vaguely tree shaped bottle :)
+Simple pulsing effect generated using a sine wave.
 """
 
 # Set how many LEDs you have
@@ -15,15 +12,7 @@ NUM_LEDS = 50
 
 # we're using HSV colours in this example - find more at https://colorpicker.me/
 # to convert a hue that's in degrees, divide it by 360
-TREE_COLOUR = (0.34, 1.0, 0.6)
-LIGHT_RATIO = 8  # every nth pixel is a light, the rest are tree.
-LIGHT_COLOURS = (
-    (0.0, 1.0, 1.0),   # red
-    (0.1, 1.0, 1.0),   # orange
-    (0.6, 1.0, 1.0),   # blue
-    (0.85, 0.4, 1.0),  # pink
-)
-LIGHT_CHANGE_CHANCE = 0.5  # change to 0.0 if you want static lights
+COLOUR = 0.5
 
 # set up the WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.COLOR_ORDER_RGB)
@@ -31,17 +20,21 @@ led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.C
 # start updating the LED strip
 led_strip.start()
 
-# initial setup
-for i in range(NUM_LEDS):
-  if i % LIGHT_RATIO == 0:  # add an appropriate number of lights
-    # choice randomly chooses from a list
-    led_strip.set_hsv(i, *choice(LIGHT_COLOURS))
-  else:  # GREEN
-    led_strip.set_hsv(i, *TREE_COLOUR)
+offset = 0
 
-# animate
 while True:
-  for i in range(NUM_LEDS):
-    if (i % LIGHT_RATIO == 0) and (random() < LIGHT_CHANGE_CHANCE):
-      led_strip.set_hsv(i, *choice(LIGHT_COLOURS))
-  time.sleep(0.5)
+    # use a sine wave to set the brightness
+    for i in range(NUM_LEDS):
+        led_strip.set_hsv(i, COLOUR, 1.0, sin(offset))
+    offset += 0.002
+
+#     # our sine wave goes between -1.0 and 1.0 - this means the LEDs will be off half the time
+#     # this formula forces the brightness to be between 0.0 and 1.0
+#     for i in range(NUM_LEDS):
+#         led_strip.set_hsv(i, COLOUR, 1.0, (1 + sin(offset)) / 2)
+#     offset += 0.002
+
+#     # adjust the saturation instead of the brightness/value
+#     for i in range(NUM_LEDS):
+#         led_strip.set_hsv(i, COLOUR, (1 + sin(offset)) / 2, 0.8)
+#     offset += 0.002
